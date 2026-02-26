@@ -1,0 +1,1017 @@
+openapi: 3.0.3
+info:
+  title: CRM Service API
+  version: 0.1.0
+  description: "Docs 기반 CRM v1 API"
+servers:
+  - url: http://localhost:3001
+    description: local
+  - url: https://api.example.com
+    description: production
+paths:
+  /healthz:
+    get:
+      tags:
+        - health
+      summary: 시스템 헬스체크
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/v1/health:
+    get:
+      tags:
+        - health
+      summary: API 헬스체크
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OkEnvelope'
+  /api/v1/auth/register:
+    post:
+      tags: [auth]
+      summary: 회원가입
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRegisterRequest'
+      responses:
+        '201':
+          description: 가입 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuthResult'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: 로그인
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLoginRequest'
+      responses:
+        '200':
+          description: 로그인 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuthResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+  /api/v1/auth/refresh:
+    post:
+      tags: [auth]
+      summary: 토큰 갱신
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: 갱신 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/AuthResult'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/auth/logout:
+    post:
+      tags: [auth]
+      summary: 로그아웃
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 로그아웃 완료
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessEnvelope'
+  /api/v1/auth/me:
+    get:
+      tags: [auth]
+      summary: 현재 사용자
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 사용자 정보
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user:
+                            $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /api/v1/contacts:
+    get:
+      tags: [contacts]
+      summary: 연락처 목록
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: pageSize
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - name: q
+          in: query
+          schema: { type: string }
+        - name: grade
+          in: query
+          schema: { type: string }
+        - name: sortBy
+          in: query
+          schema: { type: string, enum: [name, company, leadScore, createdAt], default: createdAt }
+        - name: order
+          in: query
+          schema: { type: string, enum: [asc, desc], default: desc }
+      responses:
+        '200':
+          description: 목록
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Contact' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [contacts]
+      summary: 연락처 생성
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ContactCreateRequest' }
+      responses:
+        '201':
+          description: 생성
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Contact' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+  /api/v1/contacts/{id}:
+    parameters:
+      - $ref: '#/components/parameters/ContactId'
+    get:
+      tags: [contacts]
+      summary: 연락처 조회
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 조회 결과
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ContactDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    patch:
+      tags: [contacts]
+      summary: 연락처 수정
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ContactUpdateRequest' }
+      responses:
+        '200':
+          description: 수정
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Contact' }
+    delete:
+      tags: [contacts]
+      summary: 연락처 삭제(Soft Delete)
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 삭제 완료
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SuccessEnvelope' }
+  /api/v1/contacts/{id}/activities:
+    get:
+      tags: [contacts]
+      summary: 연락처 활동 목록
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ContactId'
+      responses:
+        '200':
+          description: 목록
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Activity' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [contacts]
+      summary: 연락처 활동 추가
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ContactId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActivityCreateRequest' }
+      responses:
+        '201':
+          description: 생성
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Activity' }
+  /api/v1/deals:
+    get:
+      tags: [deals]
+      summary: 딜 목록
+      security: [ { BearerAuth: [] } ]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - in: query
+          name: stage
+          schema: { type: string }
+        - in: query
+          name: q
+          schema: { type: string }
+        - in: query
+          name: sortBy
+          schema: { type: string, enum: [title, createdAt, amount, probability], default: createdAt }
+        - in: query
+          name: order
+          schema: { type: string, enum: [asc, desc], default: desc }
+      responses:
+        '200':
+          description: 목록
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Deal' }
+    post:
+      tags: [deals]
+      summary: 딜 생성
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DealCreateRequest' }
+      responses:
+        '201':
+          description: 생성
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Deal' }
+  /api/v1/deals/{id}:
+    parameters:
+      - $ref: '#/components/parameters/DealId'
+    get:
+      tags: [deals]
+      summary: 딜 상세
+      security: [ { BearerAuth: [] } ]
+      responses:
+        '200':
+          description: 상세
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/DealDetail' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [deals]
+      summary: 딜 수정
+      security: [ { BearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DealPatchRequest' }
+      responses:
+        '200':
+          description: 수정
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Deal' }
+    delete:
+      tags: [deals]
+      summary: 딜 삭제(Soft Delete)
+      security: [ { BearerAuth: [] } ]
+      responses:
+        '200':
+          description: 삭제 처리
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SuccessEnvelope' }
+  /api/v1/deals/{id}/stage:
+    patch:
+      tags: [deals]
+      summary: 딜 스테이지 변경 + 이력 저장
+      security: [ { BearerAuth: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/DealId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DealStagePatchRequest' }
+      responses:
+        '200':
+          description: 변경
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Deal' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /api/v1/deals/pipeline:
+    get:
+      tags: [deals]
+      summary: 딜 파이프라인 집계
+      security: [ { BearerAuth: [] } ]
+      responses:
+        '200':
+          description: 파이프라인 통계
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PipelineCount'
+  /api/v1/activities:
+    get:
+      tags: [activities]
+      summary: 활동 목록
+      security: [ { BearerAuth: [] } ]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - in: query
+          name: contactId
+          schema: { type: string }
+        - in: query
+          name: dealId
+          schema: { type: string }
+      responses:
+        '200':
+          description: 목록
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Activity' }
+    post:
+      tags: [activities]
+      summary: 활동 생성
+      security: [ { BearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ActivityCreateRequest' }
+      responses:
+        '201':
+          description: 생성
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Activity' }
+  /api/v1/tasks:
+    get:
+      tags: [tasks]
+      summary: 작업 목록
+      security: [ { BearerAuth: [] } ]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+        - in: query
+          name: status
+          schema: { type: string, enum: [all, open, done], default: all }
+      responses:
+        '200':
+          description: 목록
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Task' }
+    post:
+      tags: [tasks]
+      summary: 작업 생성
+      security: [ { BearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TaskCreateRequest' }
+      responses:
+        '201':
+          description: 생성
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/Task' }
+  /api/v1/tasks/{id}/complete:
+    patch:
+      tags: [tasks]
+      summary: 작업 완료 토글
+      security: [ { BearerAuth: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/TaskId'
+      responses:
+        '200':
+          description: 완료 토글
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Task'
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/dashboard/summary:
+    get:
+      tags: [dashboard]
+      summary: 대시보드 요약 지표
+      security: [ { BearerAuth: [] } ]
+      responses:
+        '200':
+          description: 지표
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/DashboardSummary'
+  /api/v1/dashboard/pipeline-stats:
+    get:
+      tags: [dashboard]
+      summary: 스테이지별 통계
+      security: [ { BearerAuth: [] } ]
+      responses:
+        '200':
+          description: 스테이지별 통계
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PipelineStat'
+  /api/v1/reports/weekly:
+    get:
+      tags: [reports]
+      summary: 주간 리포트
+      security: [ { BearerAuth: [] } ]
+      parameters:
+        - in: query
+          name: rangeDays
+          schema: { type: integer, minimum: 1, maximum: 365, default: 30 }
+      responses:
+        '200':
+          description: 주간 리포트
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ReportResponse' }
+  /api/v1/reports/monthly:
+    get:
+      tags: [reports]
+      summary: 월간 리포트
+      security: [ { BearerAuth: [] } ]
+      parameters:
+        - in: query
+          name: rangeDays
+          schema: { type: integer, minimum: 1, maximum: 365, default: 30 }
+        responses:
+        '200':
+          description: 월간 리포트
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data: { $ref: '#/components/schemas/ReportResponse' }
+  /api/v1/reports/weekly-export:
+    get:
+      tags: [reports]
+      summary: 주간 리포트 CSV export (미구현)
+      security: [ { BearerAuth: [] } ]
+      responses:
+        '501':
+          description: 미구현
+  /api/v1/ai/lead-score/{contactId}:
+    get:
+      tags: [ai]
+      summary: 리드 스코어 조회/갱신
+      security: [ { BearerAuth: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/ContactId'
+      responses:
+        '200':
+          description: 점수
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/LeadScore'
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/ai/recommendations/{contactId}:
+    get:
+      tags: [ai]
+      summary: 추천 액션
+      security: [ { BearerAuth: [] } ]
+      parameters:
+        - $ref: '#/components/parameters/ContactId'
+      responses:
+        '200':
+          description: 추천
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RecommendationResponse'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ContactId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+    DealId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+    TaskId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+  responses:
+    Unauthorized:
+      description: 인증 실패
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    Forbidden:
+      description: 권한 없음
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    NotFound:
+      description: 리소스 없음
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    Conflict:
+      description: 상태 충돌/중복
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+    ValidationError:
+      description: 입력값 오류
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorEnvelope' }
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required: [data]
+      properties:
+        data:
+          oneOf:
+            - type: object
+            - type: array
+            - type: string
+            - type: integer
+            - type: boolean
+            - type: 'null'
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - timestamp
+            - path
+            - requestId
+          properties:
+            code: { type: string }
+            message: { type: string }
+            details: {}
+            timestamp: { type: string, format: date-time }
+            path: { type: string }
+            requestId: { type: string }
+    OkEnvelope:
+      type: object
+      properties:
+        status:
+          type: string
+          example: ok
+    PaginatedEnvelope:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            pagination:
+              $ref: '#/components/schemas/Pagination'
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer }
+        pageSize: { type: integer }
+        total: { type: integer }
+        totalPages: { type: integer }
+        hasNext: { type: boolean }
+        hasPrev: { type: boolean }
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { type: string, enum: [USER, ADMIN] }
+    AuthRegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string, minLength: 2 }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+    AuthLoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken: { type: string }
+    AuthResult:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        accessToken: { type: string }
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: string
+          example: 1h
+    Contact:
+      type: object
+      properties:
+        id: { type: string }
+        ownerId: { type: string }
+        name: { type: string }
+        email: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        company: { type: string, nullable: true }
+        leadGrade: { type: string, nullable: true }
+        leadScore: { type: integer, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ContactCreateRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string, nullable: true }
+        company: { type: string, nullable: true }
+        leadGrade: { type: string, nullable: true }
+    ContactUpdateRequest:
+      type: object
+      properties:
+        name: { type: string }
+        email: { type: string, format: email, nullable: true }
+        phone: { type: string, nullable: true }
+        company: { type: string, nullable: true }
+        leadGrade: { type: string, nullable: true }
+        leadScore: { type: integer, minimum: 0, maximum: 100, nullable: true }
+    ContactDetail:
+      allOf:
+        - $ref: '#/components/schemas/Contact'
+        - type: object
+          properties:
+            owner:
+              $ref: '#/components/schemas/User'
+            deals:
+              type: array
+              items: { $ref: '#/components/schemas/Deal' }
+            activities:
+              type: array
+              items: { $ref: '#/components/schemas/Activity' }
+    Deal:
+      type: object
+      properties:
+        id: { type: string }
+        ownerId: { type: string }
+        title: { type: string }
+        amount: { type: number }
+        probability: { type: integer, minimum: 0, maximum: 100 }
+        stage: { type: string, enum: [LEAD, QUALIFIED, PROPOSAL, NEGOTIATION, WON, LOST] }
+        expectedCloseDate: { type: string, format: date-time, nullable: true }
+        contactId: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    DealCreateRequest:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string }
+        amount: { type: number, minimum: 0, default: 0 }
+        probability: { type: integer, minimum: 0, maximum: 100, default: 0 }
+        stage: { type: string, enum: [LEAD, QUALIFIED, PROPOSAL, NEGOTIATION, WON, LOST], default: LEAD }
+        expectedCloseDate: { type: string, format: date-time, nullable: true }
+        contactId: { type: string, nullable: true }
+    DealPatchRequest:
+      allOf:
+        - $ref: '#/components/schemas/DealCreateRequest'
+    DealStagePatchRequest:
+      type: object
+      required: [stage]
+      properties:
+        stage: { type: string, enum: [LEAD, QUALIFIED, PROPOSAL, NEGOTIATION, WON, LOST] }
+    DealDetail:
+      allOf:
+        - $ref: '#/components/schemas/Deal'
+        - type: object
+          properties:
+            contact:
+              $ref: '#/components/schemas/Contact'
+            activities:
+              type: array
+              items: { $ref: '#/components/schemas/Activity' }
+            tasks:
+              type: array
+              items: { $ref: '#/components/schemas/Task' }
+    Activity:
+      type: object
+      properties:
+        id: { type: string }
+        ownerId: { type: string }
+        contactId: { type: string, nullable: true }
+        dealId: { type: string, nullable: true }
+        type: { type: string, enum: [NOTE, CALL, EMAIL, MEETING] }
+        title: { type: string }
+        note: { type: string, nullable: true }
+        scheduledAt: { type: string, format: date-time, nullable: true }
+        performedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+    ActivityCreateRequest:
+      type: object
+      required: [type, title]
+      properties:
+        type: { type: string, enum: [NOTE, CALL, EMAIL, MEETING] }
+        title: { type: string }
+        note: { type: string }
+        contactId: { type: string, nullable: true }
+        dealId: { type: string, nullable: true }
+        scheduledAt: { type: string, format: date-time, nullable: true }
+    Task:
+      type: object
+      properties:
+        id: { type: string }
+        ownerId: { type: string }
+        contactId: { type: string, nullable: true }
+        dealId: { type: string, nullable: true }
+        title: { type: string }
+        note: { type: string, nullable: true }
+        priority: { type: string, enum: [LOW, MEDIUM, HIGH] }
+        dueDate: { type: string, format: date-time, nullable: true }
+        completedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+    TaskCreateRequest:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string }
+        priority: { type: string, enum: [LOW, MEDIUM, HIGH], default: MEDIUM }
+        dueDate: { type: string, format: date-time }
+        note: { type: string }
+        contactId: { type: string, nullable: true }
+        dealId: { type: string, nullable: true }
+    DashboardSummary:
+      type: object
+      properties:
+        totalContacts: { type: integer }
+        totalDeals: { type: integer }
+        wonDeals: { type: integer }
+        openTasks: { type: integer }
+        overdueActivities: { type: integer }
+    PipelineCount:
+      type: object
+      properties:
+        stage: { type: string }
+        _count: { type: object }
+    PipelineStat:
+      type: object
+      properties:
+        stage: { type: string }
+        _count: { type: object, properties: { _all: { type: integer } } }
+        _sum: { type: object, properties: { amount: { type: number, nullable: true } } }
+    ReportResponse:
+      type: object
+      properties:
+        from: { type: string, format: date-time }
+        to: { type: string, format: date-time }
+        unit: { type: string, enum: [week, month] }
+        series:
+          type: array
+          items:
+            type: object
+            properties:
+              week: { type: string }
+              month: { type: string }
+              deals: { type: integer }
+              wonAmount: { type: number }
+    LeadScore:
+      type: object
+      properties:
+        contactId: { type: string }
+        score: { type: integer, minimum: 0, maximum: 100 }
+    RecommendationResponse:
+      type: object
+      properties:
+        contactId: { type: string }
+        score: { type: integer }
+        recommendations:
+          type: array
+          items:
+            type: string
