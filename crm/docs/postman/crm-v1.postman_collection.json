@@ -1,6 +1,6 @@
 {
   "info": {
-    "_postman_id": "6bd5490e-44d1-45f5-b976-dae160f0d11b",
+    "_postman_id": "a5002c73-667b-4a71-8f1d-c2d8c7acc857",
     "name": "CRM Service API v1",
     "description": "Generated from docs/openapi-v1.yaml",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
@@ -93,6 +93,19 @@
           }
         },
         {
+          "name": "GET /api/v1/ai/recommendations",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ai/recommendations"
+          }
+        },
+        {
           "name": "GET /api/v1/ai/recommendations/{contactId}",
           "request": {
             "method": "GET",
@@ -104,12 +117,90 @@
             ],
             "url": "{{baseUrl}}/api/v1/ai/recommendations/{{contactId}}"
           }
+        },
+        {
+          "name": "GET /api/v1/ai/recommendations/today",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ai/recommendations/today"
+          }
+        },
+        {
+          "name": "POST /api/v1/ai/rescore/{contactId}",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/ai/rescore/{{contactId}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     },
     {
       "name": "auth",
       "item": [
+        {
+          "name": "GET /api/v1/auth/admin/users",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/admin/users"
+          }
+        },
+        {
+          "name": "PATCH /api/v1/auth/admin/users/{id}/role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/admin/users/{{id}}/role",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
         {
           "name": "POST /api/v1/auth/login",
           "request": {
@@ -169,6 +260,32 @@
               }
             ],
             "url": "{{baseUrl}}/api/v1/auth/me"
+          }
+        },
+        {
+          "name": "PATCH /api/v1/auth/me",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/auth/me",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
           }
         },
         {
@@ -349,12 +466,77 @@
               }
             }
           }
+        },
+        {
+          "name": "POST /api/v1/contacts/{id}/restore",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contacts/{{id}}/restore",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /api/v1/contacts/import",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/contacts/import",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     },
     {
       "name": "dashboard",
       "item": [
+        {
+          "name": "GET /api/v1/dashboard/activities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/dashboard/activities"
+          }
+        },
         {
           "name": "GET /api/v1/dashboard/pipeline-stats",
           "request": {
@@ -478,6 +660,32 @@
           }
         },
         {
+          "name": "POST /api/v1/deals/{id}/restore",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/deals/{{id}}/restore",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
           "name": "PATCH /api/v1/deals/{id}/stage",
           "request": {
             "method": "PATCH",
@@ -528,12 +736,134 @@
             "header": [],
             "url": "{{baseUrl}}/api/v1/health"
           }
+        },
+        {
+          "name": "GET /api/v1/health/live",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/health/live"
+          }
+        },
+        {
+          "name": "GET /api/v1/health/metrics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/health/metrics"
+          }
+        },
+        {
+          "name": "GET /api/v1/health/ready",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/health/ready"
+          }
+        }
+      ]
+    },
+    {
+      "name": "notifications",
+      "item": [
+        {
+          "name": "GET /api/v1/notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications"
+          }
+        },
+        {
+          "name": "PATCH /api/v1/notifications/{id}/read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications/{{id}}/read",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "PATCH /api/v1/notifications/read-all",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/notifications/read-all",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
         }
       ]
     },
     {
       "name": "reports",
       "item": [
+        {
+          "name": "GET /api/v1/reports/activities",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/reports/activities"
+          }
+        },
         {
           "name": "GET /api/v1/reports/monthly",
           "request": {
@@ -631,6 +961,58 @@
           }
         },
         {
+          "name": "DELETE /api/v1/tasks/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{id}}"
+          }
+        },
+        {
+          "name": "GET /api/v1/tasks/{id}",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{id}}"
+          }
+        },
+        {
+          "name": "PATCH /api/v1/tasks/{id}",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{id}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
           "name": "PATCH /api/v1/tasks/{id}/complete",
           "request": {
             "method": "PATCH",
@@ -645,6 +1027,32 @@
               }
             ],
             "url": "{{baseUrl}}/api/v1/tasks/{{id}}/complete",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "POST /api/v1/tasks/{id}/restore",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{bearerToken}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/api/v1/tasks/{{id}}/restore",
             "body": {
               "mode": "raw",
               "raw": "{}",

@@ -1,4 +1,11 @@
 node_modules/
 dist/
 .env
+.env.local
+.env.production
+.env.local.bak
+.env.production.bak
+apps/api/.env
+apps/api/.env.local
+apps/api/.env.production
 *.log
