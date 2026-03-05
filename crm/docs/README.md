@@ -258,21 +258,6 @@ docs/
 
 ---
 
-## 📌 중요 링크
-
-- **서비스 URL:** https://vive-crm.com
-- **API 문서:** https://api.vive-crm.com/docs
-- **상태 페이지:** https://status.vive-crm.com
-- **지원 메일:** support@vive-crm.com
-
----
-
-## 📄 라이선스
-
-이 문서는 VIVE CRM 프로젝트 내부 사용을 목적으로 작성되었습니다.
-
----
-
 **마지막 업데이트:** 2026-03-04  
 **문서 버전:** v1.1  
 **작성자:** 권영해 / 기획·개발
