@@ -1,8 +1,9 @@
 # Software Requirements Specification (SRS)
 
-> **Version:** v1.0  
+> **Version:** v1.1  
 > **Document No.:** SRS-001  
 > **Created on:** 2026-02-24  
+> **Updated on:** 2026-03-17  
 > **Author:** Kwon Younghae / Planning and Development  
 > **Classification:** Public
 
@@ -14,6 +15,7 @@
 |---------|------|-------------|--------|----------|
 | v0.1 | 2026-02-24 | Initial draft | Kwon Younghae | - |
 | v1.0 | 2026-02-24 | Final approval | Kwon Younghae | Kwon Younghae |
+| v1.1 | 2026-03-17 | Added SEO/SaaS requirements, security requirements, Workspace model | Kwon Younghae | Kwon Younghae |
 
 ---
 

@@ -2,7 +2,21 @@
 
 ## Document Information
 
+| Item | Value |
+|------|-------|
+| **Version** | v1.1 |
+| **Created on** | 2026-02-24 |
+| **Updated on** | 2026-03-17 |
+| **Author** | Kwon Younghae / Planning and Development |
+
 This guide defines the operational baseline for running, monitoring, securing, backing up, and recovering the VIVE CRM service.
+
+## Change History
+
+| Version | Date | Description | Author |
+|---------|------|-------------|--------|
+| v1.0 | 2026-02-24 | Initial operations guide | Kwon Younghae |
+| v1.1 | 2026-03-17 | Added security operations, Redis Rate Limit, audit log monitoring | Kwon Younghae |
 
 ## 1. Overview
 
@@ -108,6 +122,52 @@ Patch dependencies, rotate secrets, and respond to vulnerability advisories on a
 ### 7.3 Secret Management
 
 Never store production secrets in source control. Use managed secret stores and platform injection.
+
+### 7.4 Redis Rate Limit Operations
+
+**Monitoring:**
+- Monitor Redis connection health via Upstash dashboard
+- Set alerts for connection limit approaching (80% threshold)
+- Track rate limit hit rates by tier
+
+**Troubleshooting:**
+```bash
+# Check rate limit status
+redis-cli> INFO stats
+redis-cli> LRANGE ratelimit:analytics 0 10
+```
+
+### 7.5 Audit Log Operations
+
+**Log Retention:**
+- Authentication logs: 1 year
+- Authorization logs: 3 years
+- Data change logs: 3 years
+- Payment logs: 5 years
+
+**Monitoring:**
+- Set alerts for suspicious patterns:
+  - Multiple login failures (5+ in 5 minutes)
+  - Permission escalation attempts
+  - Bulk data exports
+  - Unusual access times
+
+**Alert Example:**
+```
+Severity: HIGH
+Type: Security Alert
+Message: Multiple failed login attempts detected
+User: user@example.com
+IP: 192.168.1.1
+Count: 10 attempts in 5 minutes
+Action: Account temporarily locked
+```
+
+### 7.6 CSRF/Security Header Monitoring
+
+- Monitor CSP violation reports
+- Set alerts for cross-origin request attempts
+- Track security header enforcement
 
 ## 8. Operations Checklists
 

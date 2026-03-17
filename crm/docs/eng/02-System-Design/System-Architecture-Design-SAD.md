@@ -1,8 +1,9 @@
 # System Architecture Design (SAD)
 
 > **Project:** VIVE CRM  
-> **Version:** v1.0  
+> **Version:** v1.1  
 > **Created on:** 2026-02-24  
+> **Updated on:** 2026-03-17  
 > **Author:** Kwon Younghae / Planning and Development  
 > **Approver:** Kwon Younghae / Project Owner  
 > **Document Status:** Draft
@@ -42,6 +43,7 @@ This document defines the system architecture for VIVE CRM and describes key tec
 |---------|------|--------|-------------|
 | v0.1 | 2026-02-24 | Kwon Younghae | Initial draft |
 | v1.0 | 2026-02-24 | Kwon Younghae | Complete architecture design with 4 ADRs |
+| v1.1 | 2026-03-17 | Kwon Younghae | Added landing/app separation, SEO architecture, security enhancements |
 
 ---
 

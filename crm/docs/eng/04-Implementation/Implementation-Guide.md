@@ -3,8 +3,10 @@
 | Item | Value |
 |------|-------|
 | Project | VIVE CRM |
-| Version | v1.0 |
-| Purpose | Development standards and implementation guidance |
+| Version | v1.1 |
+| Created on | 2026-02-24 |
+| Updated on | 2026-03-17 |
+| Purpose | Development standards and implementation guidance, security implementation |
 
 ## 1. Overview
 
@@ -30,7 +32,10 @@ Define the development guidelines, coding standards, environment setup, module c
 
 ### 1.4 Change History
 
-This version establishes the initial implementation baseline.
+| Version | Date | Description | Author |
+|---------|------|-------------|--------|
+| v1.0 | 2026-02-24 | Initial implementation baseline | Kwon Younghae |
+| v1.1 | 2026-03-17 | Added security implementation guide, SEO/SaaS structure | Kwon Younghae |
 
 ## 2. Development Environment Setup
 
@@ -199,7 +204,135 @@ Use JWT validation, owner checks, and admin guards consistently.
 
 Protect secrets, credentials, tokens, and privacy-sensitive fields from logs and source control.
 
-## 11. Implementation Schedule
+## 11. Security Implementation Guide
+
+### 11.1 Authentication Implementation
+
+#### Access Token Storage
+```typescript
+// ❌ DON'T: localStorage
+localStorage.setItem('accessToken', token);
+
+// ✅ DO: Memory only (React Context/Zustand)
+const useAuthStore = create(() => ({ accessToken: null }));
+```
+
+#### Refresh Token Handling
+```typescript
+// Backend: HttpOnly Cookie
+res.cookie('refreshToken', token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'strict',
+  maxAge: 14 * 24 * 60 * 60 * 1000 // 14 days
+});
+
+// ❌ DON'T: Send in JSON response
+// res.json({ refreshToken: token });
+```
+
+### 11.2 CSRF Protection Implementation
+
+#### Middleware Setup
+```typescript
+// middleware.ts
+export function middleware(request: NextRequest) {
+  // Check Sec-Fetch-Site header
+  const secFetchSite = request.headers.get('sec-fetch-site');
+  if (secFetchSite !== 'same-origin') {
+    return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+  }
+  
+  // Validate Origin/Referer
+  const origin = request.headers.get('origin');
+  if (origin !== process.env.NEXT_PUBLIC_APP_URL) {
+    return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+  }
+}
+```
+
+#### CSRF Token for Sensitive Operations
+```typescript
+// Generate CSRF token
+const csrfToken = crypto.randomUUID();
+res.cookie('csrf-token', csrfToken, { httpOnly: false, sameSite: 'strict' });
+
+// Validate on state-changing requests
+if (req.headers['x-csrf-token'] !== req.cookies['csrf-token']) {
+  return res.status(403).json({ error: 'Invalid CSRF token' });
+}
+```
+
+### 11.3 Rate Limit Implementation
+
+```typescript
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(100, '1 m'),
+  analytics: true,
+});
+
+// Apply in middleware
+const { success, limit, remaining, reset } = await ratelimit.limit(identifier);
+if (!success) {
+  return res.status(429).json({ error: 'Rate limit exceeded' });
+}
+```
+
+### 11.4 Security Headers
+
+```typescript
+// next.config.js
+async headers() {
+  return [{
+    source: '/:path*',
+    headers: [
+      { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline'" },
+      { key: 'X-Frame-Options', value: 'DENY' },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+    ],
+  }];
+}
+```
+
+## 12. SEO Implementation Guide
+
+### 12.1 Route Group Structure
+```
+app/
+├── (landing)/           # Public landing group
+│   ├── page.tsx         # / - Landing page
+│   ├── features/
+│   ├── pricing/
+│   └── layout.tsx       # Landing layout (no auth)
+├── (app)/               # Authenticated app group
+│   ├── dashboard/
+│   ├── contacts/
+│   └── layout.tsx       # App layout (with auth)
+```
+
+### 12.2 Metadata Implementation
+```typescript
+// app/layout.tsx
+export const metadata: Metadata = {
+  metadataBase: new URL('https://vive-crm.com'),
+  title: { template: '%s | VIVE CRM', default: 'VIVE CRM' },
+  description: 'AI-powered sales management platform',
+  openGraph: {
+    type: 'website',
+    title: 'VIVE CRM',
+    description: 'AI-powered sales management',
+    images: ['/og-image.png'],
+  },
+};
+```
+
+## 13. Implementation Schedule
 
 Implementation follows the MVP roadmap: auth and contacts first, then deals, AI, tasks, dashboard, reporting, testing, and release preparation.
 
